@@ -37,15 +37,25 @@ def print_cube(num, ctx):
     # function to print cube of given num
     context.attach(ctx)
     with tracer.start_as_current_span("child1") as child1:
-        current_span.set_attribute("operation.name", "child1!")
+        cube_context = context.set_value(
+                "operation.name", "child1!", ctx
+            )
+        context.attach(cube_context)
         # context.attach(ctx)
         print("Cube: {}" .format(num * num * num))
  
  
 def print_square(num, ctx):
-    context.attach(ctx)
-    with tracer.start_as_current_span("child2") as child1:
-        current_span.set_attribute("operation.name", "child1!")
+    
+    with tracer.start_as_current_span("child2") as child2:
+        # square_context = context.set_attribute(
+        #         "operation.name", "child1!", ctx
+        #     )
+        square_context = context.set_value(
+                "operation.name", "child2!", ctx
+            )
+        context.attach(square_context)
+        # current_span.set_attribute("operation.name", "child1!")
     # function to print square of given num
         print("Square: {}" .format(num * num))
  
@@ -55,6 +65,7 @@ if __name__ =="__main__":
     ctx = context.get_current()
     with tracer.start_as_current_span("parent") as parent:
         current_span = trace.get_current_span()
+        
         current_span.set_attribute("operation.name", "Reached parent!")
         
         t1 = threading.Thread(target=print_square, args=(10, ctx))
